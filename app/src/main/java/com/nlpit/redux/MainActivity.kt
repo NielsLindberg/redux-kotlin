@@ -3,24 +3,25 @@ package com.nlpit.redux
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ObservableField
 import com.nlpit.redux.databinding.ActivityMainBinding
-import com.nlpit.redux.redux.CounterActions
-import com.nlpit.redux.redux.DI
-import java.util.*
-
+import com.nlpit.redux.redux.*
+import timber.log.Timber
+import java.lang.Exception
 
 class MainViewModel {
 
-    val counterText = ObservableField("")
+    val counterState: ObservableField<CounterState> = ObservableField()
 
     init {
         DI.store.dispatch(action = CounterActions.Init)
 
-        DI.store.add {
-            counterText.set(it.value.toString())
+        DI.store.subscribe { state ->
+            if(state.counterState != counterState.get()) {
+                Timber.d("Redux > Reciever > ${state.counterState}")
+                counterState.set(state.counterState)
+            }
         }
     }
 
@@ -31,14 +32,17 @@ class MainViewModel {
     fun incrementButtonOnClick(view: View) {
         DI.store.dispatch(action = CounterActions.Increment)
     }
-
 }
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        Timber.plant(Timber.DebugTree())
+        val binding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.viewModel = MainViewModel()
+
+        DI.store.dispatch(CounterActions.GeneralError(Exception("Test Error")))
     }
 }
