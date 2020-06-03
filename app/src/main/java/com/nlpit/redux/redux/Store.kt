@@ -1,9 +1,16 @@
 package com.nlpit.redux.redux
 
+import com.nlpit.redux.redux.actions.Action
+import com.nlpit.redux.redux.middleware.Middleware
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+
 typealias StoreSubscriber <S> = (S) -> Unit
 typealias Dispatch = (Action) -> Unit
 typealias Next<State> = (State, Action, Dispatch, Reducer<State>) -> Action
-typealias Middleware<State> = (State, Action, Dispatch, Next<State>, Reducer<State>) -> Action
+
 
 interface Store<S : State> {
     fun subscribe(subscriber: StoreSubscriber<S>)
@@ -14,7 +21,7 @@ class DefaultStore<S : State>(
     initialState: S,
     private val reducer: Reducer<S>,
     private val middleware: List<Middleware<S>>
-) : Store<S> {
+) : Store<S>, CoroutineScope {
 
     private var state: S = initialState
         set(value) {
@@ -24,13 +31,15 @@ class DefaultStore<S : State>(
     private val subscribers = mutableListOf<StoreSubscriber<S>>()
 
     fun dispatch(action: Action) {
-        val newAction = applyMiddleware(state, action, reducer)
-        val newState = reducer(state, newAction)
+        launch {
+            val newAction = applyMiddleware(state, action, reducer)
+            val newState = reducer(state, newAction)
 
-        if (newState == state) {
-            return
+            if (newState == state) {
+                return@launch
+            }
+            state = newState
         }
-        state = newState
     }
 
     private fun applyMiddleware(state: S, action: Action, reducer: Reducer<S>): Action {
@@ -54,10 +63,18 @@ class DefaultStore<S : State>(
     }
 
     override fun subscribe(subscriber: StoreSubscriber<S>) {
-        subscribers.add(subscriber)
+        launch {
+            subscribers.add(subscriber)
+        }
+
     }
 
     override fun remove(subscriber: StoreSubscriber<S>) {
-        subscribers.remove(subscriber)
+        launch {
+            subscribers.remove(subscriber)
+        }
     }
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main
 }

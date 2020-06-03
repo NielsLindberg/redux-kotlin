@@ -1,5 +1,8 @@
 package com.nlpit.redux.redux
 
+import com.nlpit.redux.redux.actions.Action
+import com.nlpit.redux.redux.actions.CounterActions
+
 typealias Reducer <S> = (S, Action) -> S
 
 val CounterStateReducer: Reducer<CounterState> = { old, action ->

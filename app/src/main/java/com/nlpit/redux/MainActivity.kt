@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ObservableField
 import com.nlpit.redux.databinding.ActivityMainBinding
 import com.nlpit.redux.redux.*
+import com.nlpit.redux.redux.actions.CounterActions
 import timber.log.Timber
 import java.lang.Exception
 
