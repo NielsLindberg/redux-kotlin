@@ -11,8 +11,8 @@ typealias StoreSubscriber <S> = (S) -> Unit
 typealias Dispatch = (Action) -> Unit
 typealias Next<State> = (State, Action, Dispatch, Reducer<State>) -> Action
 
-
 interface Store<S : State> {
+    fun dispatch(action: Action)
     fun subscribe(subscriber: StoreSubscriber<S>)
     fun remove(subscriber: StoreSubscriber<S>)
 }
@@ -30,7 +30,7 @@ class DefaultStore<S : State>(
         }
     private val subscribers = mutableListOf<StoreSubscriber<S>>()
 
-    fun dispatch(action: Action) {
+    override fun dispatch(action: Action) {
         launch {
             val newAction = applyMiddleware(state, action, reducer)
             val newState = reducer(state, newAction)

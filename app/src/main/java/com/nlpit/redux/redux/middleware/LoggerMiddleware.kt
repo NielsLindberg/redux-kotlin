@@ -17,11 +17,15 @@ class LoggerMiddleware<S: State>: Middleware<S> {
         next: Next<S>,
         reducer: Reducer<S>
     ): Action {
-        Timber.d("Redux > Store > oldState $state")
-        Timber.d("Redux > Store > Action: $action")
         val newAction = next(state, action, dispatch, reducer)
         val newState = reducer(state, action)
-        Timber.d("Redux > Store > newState: $newState)")
+
+        if(state != newState) {
+            Timber.d("$state > $action > $newState")
+        } else {
+            Timber.d("$state > $action")
+        }
+
         return newAction
     }
 }

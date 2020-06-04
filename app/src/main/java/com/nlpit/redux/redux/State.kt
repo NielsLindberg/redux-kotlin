@@ -1,8 +1,5 @@
 package com.nlpit.redux.redux
 
-import androidx.databinding.BaseObservable
-import java.util.*
-
 interface State
 
 data class CounterState(
