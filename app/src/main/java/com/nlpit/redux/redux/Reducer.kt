@@ -2,6 +2,7 @@ package com.nlpit.redux.redux
 
 import com.nlpit.redux.redux.actions.Action
 import com.nlpit.redux.redux.actions.CounterActions
+import com.nlpit.redux.redux.actions.NavigateActions
 
 typealias Reducer <S> = (S, Action) -> S
 
@@ -20,9 +21,17 @@ val ErrorStateReducer: Reducer<ErrorState?> = { old, action ->
     }
 }
 
+val NavigationReducer: Reducer<ScreenState> = { old, action ->
+    when(action) {
+        is NavigateActions.HomeScreen -> old.copy(currentScreen = Screen.Home)
+        else -> old
+    }
+}
+
 val AppStateReducer: Reducer<AppState> = { old, action ->
     AppState(
         counterState = CounterStateReducer(old.counterState, action),
-        errorState = ErrorStateReducer(old.errorState, action)
+        errorState = ErrorStateReducer(old.errorState, action),
+        screenState = NavigationReducer(old.screenState, action)
     )
 }

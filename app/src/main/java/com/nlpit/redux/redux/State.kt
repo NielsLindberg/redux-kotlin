@@ -10,7 +10,18 @@ data class CounterState(
 
 data class AppState(
     val counterState: CounterState,
-    val errorState: ErrorState? = null
+    val errorState: ErrorState? = null,
+    val screenState: ScreenState
 ) : State
 
 data class ErrorState(val message: String?) : State
+
+data class ScreenState(
+    val currentScreen: Screen = Screen.Home
+)
+
+sealed class Screen {
+    object Home: Screen()
+    object Lol: Screen()
+    object Yo: Screen()
+}

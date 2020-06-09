@@ -5,7 +5,7 @@ import com.nlpit.redux.redux.middleware.LoggerMiddleware
 
 object DI {
     val store = DefaultStore(
-        initialState = AppState(CounterState()),
+        initialState = AppState(CounterState(), screenState = ScreenState()),
         reducer = AppStateReducer,
         middleware = listOf(AsyncMiddleware(), LoggerMiddleware())
     )

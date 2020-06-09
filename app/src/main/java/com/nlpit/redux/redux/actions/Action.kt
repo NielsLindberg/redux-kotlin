@@ -24,3 +24,7 @@ sealed class WaitActions(payload: Any? = null): Action(payload) {
     object TimedOut: WaitActions()
     class FinishedWaiting(val results: String): WaitActions(results)
 }
+
+sealed class NavigateActions: Action() {
+    object HomeScreen: NavigateActions()
+}

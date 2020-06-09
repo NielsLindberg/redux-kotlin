@@ -7,14 +7,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-typealias StoreSubscriber <S> = (S) -> Unit
+//typealias StoreSubscriber <S> = (S) -> Unit
 typealias Dispatch = (Action) -> Unit
 typealias Next<State> = (State, Action, Dispatch, Reducer<State>) -> Action
 
 interface Store<S : State> {
     fun dispatch(action: Action)
-    fun subscribe(subscriber: StoreSubscriber<S>)
-    fun remove(subscriber: StoreSubscriber<S>)
+    var state: S
+    //fun subscribe(subscriber: StoreSubscriber<S>)
+    //fun remove(subscriber: StoreSubscriber<S>)
 }
 
 class DefaultStore<S : State>(
@@ -23,12 +24,8 @@ class DefaultStore<S : State>(
     private val middleware: List<Middleware<S>>
 ) : Store<S>, CoroutineScope {
 
-    private var state: S = initialState
-        set(value) {
-            field = value
-            subscribers.forEach { it(value) }
-        }
-    private val subscribers = mutableListOf<StoreSubscriber<S>>()
+    override var state: S = initialState
+    //private val subscribers = mutableListOf<StoreSubscriber<S>>()
 
     override fun dispatch(action: Action) {
         launch {
@@ -62,18 +59,18 @@ class DefaultStore<S : State>(
         }
     }
 
-    override fun subscribe(subscriber: StoreSubscriber<S>) {
-        launch {
-            subscribers.add(subscriber)
-        }
-
-    }
-
-    override fun remove(subscriber: StoreSubscriber<S>) {
-        launch {
-            subscribers.remove(subscriber)
-        }
-    }
+//    override fun subscribe(subscriber: StoreSubscriber<S>) {
+//        launch {
+//            subscribers.add(subscriber)
+//        }
+//
+//    }
+//
+//    override fun remove(subscriber: StoreSubscriber<S>) {
+//        launch {
+//            subscribers.remove(subscriber)
+//        }
+//    }
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
