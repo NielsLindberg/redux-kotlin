@@ -20,7 +20,6 @@ class MainViewModel {
 
         DI.store.subscribe { state ->
             if(state.counterState != counterState.get()) {
-                Timber.d("Redux > Reciever > ${state.counterState}")
                 counterState.set(state.counterState)
             }
         }
@@ -40,8 +39,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.plant(Timber.DebugTree())
-        val binding: ActivityMainBinding =
-            DataBindingUtil.setContentView(this, R.layout.activity_main)
+        val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.viewModel = MainViewModel()
 
         DI.store.dispatch(CounterActions.GeneralError(Exception("Test Error")))
