@@ -7,15 +7,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-//typealias StoreSubscriber <S> = (S) -> Unit
+interface StateSubscriber<S> {
+    fun onState(state: S)
+}
+
 typealias Dispatch = (Action) -> Unit
 typealias Next<State> = (State, Action, Dispatch, Reducer<State>) -> Action
 
 interface Store<S : State> {
     fun dispatch(action: Action)
     var state: S
-    //fun subscribe(subscriber: StoreSubscriber<S>)
-    //fun remove(subscriber: StoreSubscriber<S>)
+    fun subscribe(subscriber: StateSubscriber<S>)
+    fun remove(subscriber: StateSubscriber<S>)
 }
 
 class DefaultStore<S : State>(
@@ -25,7 +28,12 @@ class DefaultStore<S : State>(
 ) : Store<S>, CoroutineScope {
 
     override var state: S = initialState
-    //private val subscribers = mutableListOf<StoreSubscriber<S>>()
+        set(value) {
+            field = value
+            subscribers.forEach { it.onState(value) }
+        }
+
+    private val subscribers = mutableListOf<StateSubscriber<S>>()
 
     override fun dispatch(action: Action) {
         launch {
@@ -46,7 +54,7 @@ class DefaultStore<S : State>(
     private fun next(index: Int): Next<S> {
         if (index == middleware.size) {
             // Last link of the chain. It just returns the action as is.
-            return { _, action, _ , _-> action }
+            return { _, action, _, _ -> action }
         }
         return { state, action, dispatch, reducer ->
             middleware[index].invoke(
@@ -59,18 +67,19 @@ class DefaultStore<S : State>(
         }
     }
 
-//    override fun subscribe(subscriber: StoreSubscriber<S>) {
-//        launch {
-//            subscribers.add(subscriber)
-//        }
-//
-//    }
-//
-//    override fun remove(subscriber: StoreSubscriber<S>) {
-//        launch {
-//            subscribers.remove(subscriber)
-//        }
-//    }
+    override fun subscribe(subscriber: StateSubscriber<S>) {
+        launch {
+            subscriber.onState(state)
+            subscribers.add(subscriber)
+        }
+
+    }
+
+    override fun remove(subscriber: StateSubscriber<S>) {
+        launch {
+            subscribers.remove(subscriber)
+        }
+    }
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main

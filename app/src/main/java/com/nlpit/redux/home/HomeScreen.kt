@@ -7,7 +7,6 @@ import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.Column
 import androidx.ui.material.*
-import com.nlpit.redux.AppDrawer
 import com.nlpit.redux.redux.AppState
 import com.nlpit.redux.redux.Screen
 
@@ -18,15 +17,9 @@ fun HomeScreen(
 ) {
     Scaffold(
         scaffoldState = scaffoldState,
-        drawerContent = {
-            AppDrawer(
-                currentScreen = Screen.Home,
-                closeDrawer = { scaffoldState.drawerState = DrawerState.Closed }
-            )
-        },
         topAppBar = {
             TopAppBar(
-                title = { Text(text = "Jetnews") }
+                title = { Text(text = "Redux App") }
             )
         },
         bodyContent = { modifier ->

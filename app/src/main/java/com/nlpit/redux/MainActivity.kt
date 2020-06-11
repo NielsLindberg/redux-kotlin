@@ -2,26 +2,32 @@ package com.nlpit.redux
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.ui.core.setContent
-import androidx.ui.geometry.Size
 import com.nlpit.redux.redux.*
 import timber.log.Timber
+import androidx.ui.core.setContent
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), StateSubscriber<AppState> {
+
+
+    override fun onState(state: AppState) {
+        setContent {
+            ReduxApp(state)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.plant(Timber.DebugTree())
+    }
 
-        setContent {
-            ReduxApp(DI.store.state)
-        }
+    override fun onResume() {
+        DI.store.subscribe(this)
+        super.onResume()
+    }
 
-//        val binding: ActivityMainBinding =
-//            DataBindingUtil.setContentView(this, R.layout.activity_main)
-//        binding.viewModel = MainViewModel()
-//
-//        DI.store.dispatch(CounterActions.GeneralError(Exception("Test Error")))
+    override fun onPause() {
+        DI.store.remove(this)
+        super.onPause()
     }
 }
