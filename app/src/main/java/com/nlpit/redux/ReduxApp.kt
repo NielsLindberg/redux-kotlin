@@ -1,26 +1,14 @@
 package com.nlpit.redux
 
 import androidx.compose.Composable
-import androidx.ui.animation.Crossfade
-import androidx.ui.core.Alignment
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.Image
+import androidx.compose.MutableState
 import androidx.ui.foundation.Text
-import androidx.ui.graphics.ColorFilter
-import androidx.ui.graphics.vector.VectorAsset
 import androidx.ui.layout.*
 import androidx.ui.material.*
-import androidx.ui.material.icons.Icons
-import androidx.ui.material.icons.filled.Home
-import androidx.ui.unit.Dp
-import androidx.ui.unit.dp
-import com.nlpit.redux.home.HomeScreen
-import com.nlpit.redux.redux.AppState
-import com.nlpit.redux.redux.DI
-import com.nlpit.redux.redux.Screen
+import com.nlpit.redux.redux.*
 import com.nlpit.redux.redux.actions.CounterActions
-import com.nlpit.redux.redux.actions.NavigateActions
 import com.nlpit.redux.theme.reduxTheme
+import timber.log.Timber
 
 @Composable
 fun ReduxApp(state: AppState) {
@@ -32,14 +20,34 @@ fun ReduxApp(state: AppState) {
 @Composable
 private fun AppContent(state: AppState) {
     Column {
+        stationFeatureTabs(state.screenState)
         Button(onClick = { DI.store.dispatch(CounterActions.Decrement) }) {
             Text("Decrement")
         }
         Divider()
-        Text(state.counterState.string)
+        textComposable(state = state.counterState)
         Divider()
         Button(onClick = { DI.store.dispatch(CounterActions.Increment) }) {
             Text("Increment")
+        }
+    }
+}
+
+@Composable
+fun textComposable(state: MutableState<CounterState>) {
+    Timber.d("compose: number")
+    Text(state.value.string)
+}
+
+@Composable
+fun stationFeatureTabs(state: MutableState<ScreenState>) {
+    Timber.d("compose: tab")
+    TabRow(items = state.value.screens, selectedIndex = state.value.currentScreen.index) { int, screen ->
+        Tab(
+            onSelected = { DI.store.dispatch(screen.action) },
+            selected = state.value.currentScreen.index == int
+        ) {
+            Text(screen.title)
         }
     }
 }

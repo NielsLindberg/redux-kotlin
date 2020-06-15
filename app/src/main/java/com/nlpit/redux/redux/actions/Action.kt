@@ -27,4 +27,6 @@ sealed class WaitActions(payload: Any? = null): Action(payload) {
 
 sealed class NavigateActions: Action() {
     object HomeScreen: NavigateActions()
+    object LolScreen: NavigateActions()
+    object YoScreen: NavigateActions()
 }

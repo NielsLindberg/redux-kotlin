@@ -9,22 +9,15 @@ import timber.log.Timber
  * new state would look if it was reduced with the action. (not possible to inject logging after the actual reduce since middleware
  * by definition is between dispatch and reduce)
  */
-class LoggerMiddleware<S: State>: Middleware<S> {
+class LoggerMiddleware : Middleware {
     override fun invoke(
-        state: S,
+        state: AppState,
         action: Action,
         dispatch: Dispatch,
-        next: Next<S>,
-        reducer: Reducer<S>
+        next: Next
     ): Action {
-        val newAction = next(state, action, dispatch, reducer)
-        val newState = reducer(state, action)
-
-        if(state != newState) {
-            Timber.d("$state > $action > $newState")
-        } else {
-            Timber.d("$state > $action")
-        }
+        val newAction = next(state, action, dispatch)
+        Timber.d("$state > $action")
 
         return newAction
     }

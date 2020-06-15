@@ -7,27 +7,15 @@ import timber.log.Timber
 import androidx.ui.core.setContent
 
 
-class MainActivity : AppCompatActivity(), StateSubscriber<AppState> {
-
-
-    override fun onState(state: AppState) {
-        setContent {
-            ReduxApp(state)
-        }
-    }
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.plant(Timber.DebugTree())
+
+        setContent {
+            ReduxApp(DI.store.state)
+        }
     }
 
-    override fun onResume() {
-        DI.store.subscribe(this)
-        super.onResume()
-    }
-
-    override fun onPause() {
-        DI.store.remove(this)
-        super.onPause()
-    }
 }

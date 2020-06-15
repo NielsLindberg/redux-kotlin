@@ -1,37 +1,58 @@
 package com.nlpit.redux.redux
 
+import androidx.compose.MutableState
 import com.nlpit.redux.redux.actions.Action
 import com.nlpit.redux.redux.actions.CounterActions
 import com.nlpit.redux.redux.actions.NavigateActions
 
-typealias Reducer <S> = (S, Action) -> S
+interface Reducer<S> {
+    fun reduce(state: S, action: Action)
+}
 
-val CounterStateReducer: Reducer<CounterState> = { old, action ->
-    when (action) {
-        is CounterActions.Increment -> old.copy(value = old.value + 1)
-        is CounterActions.Decrement -> old.copy(value = old.value - 1)
-        else -> old
+object CounterStateReducer : Reducer<MutableState<CounterState>> {
+    override fun reduce(state: MutableState<CounterState>, action: Action) {
+        when (action) {
+            is CounterActions.Increment -> state.apply {
+                value = value.copy(counter = value.counter + 1)
+            }
+            is CounterActions.Decrement -> state.apply {
+                value = value.copy(counter = value.counter - 1)
+            }
+        }
+    }
+
+}
+
+object ErrorStateReducer : Reducer<MutableState<ErrorState>> {
+    override fun reduce(state: MutableState<ErrorState>, action: Action) {
+        when (action) {
+            is CounterActions.GeneralError -> state.apply {
+                value = ErrorState(message = action.error.message ?: "No Message")
+            }
+        }
     }
 }
 
-val ErrorStateReducer: Reducer<ErrorState?> = { old, action ->
-    when (action) {
-        is CounterActions.GeneralError -> ErrorState(message = action.error.message)
-        else -> null
+object NavigationReducer : Reducer<MutableState<ScreenState>> {
+    override fun reduce(state: MutableState<ScreenState>, action: Action) {
+        when (action) {
+            is NavigateActions.HomeScreen -> state.apply {
+                value = ScreenState(currentScreen = Screen.Home)
+            }
+            is NavigateActions.LolScreen -> state.apply {
+                value = ScreenState(currentScreen = Screen.Lol)
+            }
+            is NavigateActions.YoScreen -> state.apply {
+                value = ScreenState(currentScreen = Screen.Yo)
+            }
+        }
     }
 }
 
-val NavigationReducer: Reducer<ScreenState> = { old, action ->
-    when(action) {
-        is NavigateActions.HomeScreen -> old.copy(currentScreen = Screen.Home)
-        else -> old
+object AppStateReducer : Reducer<AppState> {
+    override fun reduce(state: AppState, action: Action) {
+        CounterStateReducer.reduce(state.counterState, action)
+        ErrorStateReducer.reduce(state.errorState, action)
+        NavigationReducer.reduce(state.screenState, action)
     }
-}
-
-val AppStateReducer: Reducer<AppState> = { old, action ->
-    AppState(
-        counterState = CounterStateReducer(old.counterState, action),
-        errorState = ErrorStateReducer(old.errorState, action),
-        screenState = NavigationReducer(old.screenState, action)
-    )
 }

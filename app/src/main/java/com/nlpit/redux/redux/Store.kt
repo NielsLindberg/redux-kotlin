@@ -7,77 +7,45 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-interface StateSubscriber<S> {
-    fun onState(state: S)
-}
-
 typealias Dispatch = (Action) -> Unit
-typealias Next<State> = (State, Action, Dispatch, Reducer<State>) -> Action
+typealias Next = (AppState, Action, Dispatch) -> Action
 
-interface Store<S : State> {
+interface Store {
     fun dispatch(action: Action)
-    var state: S
-    fun subscribe(subscriber: StateSubscriber<S>)
-    fun remove(subscriber: StateSubscriber<S>)
+    val state: AppState
 }
 
-class DefaultStore<S : State>(
-    initialState: S,
-    private val reducer: Reducer<S>,
-    private val middleware: List<Middleware<S>>
-) : Store<S>, CoroutineScope {
+class DefaultStore(
+    initialState: AppState,
+    private val reducer: Reducer<AppState>,
+    private val middleware: List<Middleware>
+) : Store, CoroutineScope {
 
-    override var state: S = initialState
-        set(value) {
-            field = value
-            subscribers.forEach { it.onState(value) }
-        }
-
-    private val subscribers = mutableListOf<StateSubscriber<S>>()
+    override val state: AppState = initialState
 
     override fun dispatch(action: Action) {
         launch {
-            val newAction = applyMiddleware(state, action, reducer)
-            val newState = reducer(state, newAction)
-
-            if (newState == state) {
-                return@launch
-            }
-            state = newState
+            val newAction = applyMiddleware(state, action)
+            reducer.reduce(state, newAction)
         }
     }
 
-    private fun applyMiddleware(state: S, action: Action, reducer: Reducer<S>): Action {
-        return next(0)(state, action, ::dispatch, reducer)
+    private fun applyMiddleware(state: AppState, action: Action): Action {
+        return next(0)(state, action, ::dispatch)
     }
 
-    private fun next(index: Int): Next<S> {
+    private fun next(index: Int): Next {
         if (index == middleware.size) {
             // Last link of the chain. It just returns the action as is.
-            return { _, action, _, _ -> action }
+            return { _, action, _ -> action }
         }
-        return { state, action, dispatch, reducer ->
+        return { state, action, dispatch  ->
             middleware[index].invoke(
                 state,
                 action,
                 dispatch,
-                next(index + 1),
-                reducer
+                next(index + 1)
             )
-        }
-    }
-
-    override fun subscribe(subscriber: StateSubscriber<S>) {
-        launch {
-            subscriber.onState(state)
-            subscribers.add(subscriber)
-        }
-
-    }
-
-    override fun remove(subscriber: StateSubscriber<S>) {
-        launch {
-            subscribers.remove(subscriber)
         }
     }
 

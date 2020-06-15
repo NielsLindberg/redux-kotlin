@@ -1,27 +1,28 @@
 package com.nlpit.redux.redux
 
-interface State
+import androidx.compose.MutableState
+import com.nlpit.redux.redux.actions.NavigateActions
 
 data class CounterState(
-    val value: Int = 0
-) : State {
-    val string: String get() = value.toString()
+    val counter: Int = 0
+) {
+    val string: String get() = counter.toString()
 }
 
 data class AppState(
-    val counterState: CounterState,
-    val errorState: ErrorState? = null,
-    val screenState: ScreenState
-) : State
-
-data class ErrorState(val message: String?) : State
-
-data class ScreenState(
-    val currentScreen: Screen = Screen.Home
+    var counterState: MutableState<CounterState>,
+    var errorState: MutableState<ErrorState>,
+    var screenState: MutableState<ScreenState>
 )
 
-sealed class Screen {
-    object Home: Screen()
-    object Lol: Screen()
-    object Yo: Screen()
+data class ErrorState(val message: String?)
+
+data class ScreenState(
+    val currentScreen: Screen = Screen.Home,
+    val screens: List<Screen> = listOf(Screen.Home, Screen.Lol, Screen.Yo))
+
+sealed class Screen(val index: Int, val title: String, val action: NavigateActions) {
+    object Home: Screen(0, "Home", NavigateActions.HomeScreen)
+    object Lol: Screen(1, "Lol", NavigateActions.LolScreen)
+    object Yo: Screen(2, "Yo", NavigateActions.YoScreen)
 }
