@@ -34,5 +34,5 @@ suspend fun wait10seconds(state: AppState, action: Action, dispatch: Dispatch) {
     dispatch(WaitActions.StartWaiting)
     delay(5000) // pretend we are doing something asynchronous here
 
-    dispatch(WaitActions.FinishedWaiting(state.counterState.value.string))
+    dispatch(WaitActions.FinishedWaiting(state.counterState.string))
 }

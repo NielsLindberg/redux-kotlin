@@ -1,5 +1,8 @@
 package com.nlpit.redux.redux
 
+import Reducer
+import androidx.compose.MutableState
+import androidx.compose.mutableStateOf
 import com.nlpit.redux.redux.actions.Action
 import com.nlpit.redux.redux.middleware.Middleware
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +15,7 @@ typealias Next = (AppState, Action, Dispatch) -> Action
 
 interface Store {
     fun dispatch(action: Action)
-    val state: AppState
+    val state: MutableState<AppState>
 }
 
 class DefaultStore(
@@ -21,12 +24,12 @@ class DefaultStore(
     private val middleware: List<Middleware>
 ) : Store, CoroutineScope {
 
-    override val state: AppState = initialState
+    override val state: MutableState<AppState> = mutableStateOf(initialState)
 
     override fun dispatch(action: Action) {
         launch {
-            val newAction = applyMiddleware(state, action)
-            reducer.reduce(state, newAction)
+            val newAction = applyMiddleware(state.value, action)
+            state.value = reducer(state.value, newAction)
         }
     }
 

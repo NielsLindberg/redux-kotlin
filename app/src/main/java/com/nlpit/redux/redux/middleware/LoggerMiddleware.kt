@@ -17,7 +17,7 @@ class LoggerMiddleware : Middleware {
         next: Next
     ): Action {
         val newAction = next(state, action, dispatch)
-        Timber.d("$state > $action")
+        Timber.d("$action")
 
         return newAction
     }

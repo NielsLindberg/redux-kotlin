@@ -1,12 +1,12 @@
 package com.nlpit.redux
 
 import android.app.Application
+import timber.log.Timber
 
 class ReduxApplication : Application() {
 
-    // AppContainer instance used by the rest of classes to obtain dependencies
-
     override fun onCreate() {
         super.onCreate()
+        Timber.plant(Timber.DebugTree())
     }
 }

@@ -11,9 +11,9 @@ import com.nlpit.redux.theme.reduxTheme
 import timber.log.Timber
 
 @Composable
-fun ReduxApp(state: AppState) {
+fun ReduxApp(state: MutableState<AppState>) {
     reduxTheme {
-        AppContent(state)
+        AppContent(state.value)
     }
 }
 
@@ -25,7 +25,7 @@ private fun AppContent(state: AppState) {
             Text("Decrement")
         }
         Divider()
-        textComposable(state = state.counterState)
+        counterStateRow(state.counterState)
         Divider()
         Button(onClick = { DI.store.dispatch(CounterActions.Increment) }) {
             Text("Increment")
@@ -34,18 +34,32 @@ private fun AppContent(state: AppState) {
 }
 
 @Composable
-fun textComposable(state: MutableState<CounterState>) {
-    Timber.d("compose: number")
-    Text(state.value.string)
+fun counterStateRow(state: CounterState) {
+    Timber.d("compose: counterstate row")
+    Row {
+        counterComposable(state = state)
+        nestedCounterComposable(state = state.nestedCounterState)
+    }
+}
+@Composable
+fun counterComposable(state: CounterState) {
+    Timber.d("compose: counter")
+    Text(state.string)
 }
 
 @Composable
-fun stationFeatureTabs(state: MutableState<ScreenState>) {
+fun nestedCounterComposable(state: NestedCounterState) {
+    Timber.d("compose: nested counter")
+    Text(state.string)
+}
+
+@Composable
+fun stationFeatureTabs(state: ScreenState) {
     Timber.d("compose: tab")
-    TabRow(items = state.value.screens, selectedIndex = state.value.currentScreen.index) { int, screen ->
+    TabRow(items = state.screens, selectedIndex = state.currentScreen.index) { int, screen ->
         Tab(
             onSelected = { DI.store.dispatch(screen.action) },
-            selected = state.value.currentScreen.index == int
+            selected = state.currentScreen.index == int
         ) {
             Text(screen.title)
         }
