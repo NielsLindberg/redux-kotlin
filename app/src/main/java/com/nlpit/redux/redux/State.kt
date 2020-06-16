@@ -10,9 +10,9 @@ data class CounterState(
 }
 
 data class AppState(
-    var counterState: MutableState<CounterState>,
-    var errorState: MutableState<ErrorState>,
-    var screenState: MutableState<ScreenState>
+    val counterState: MutableState<CounterState>,
+    val errorState: MutableState<ErrorState>,
+    val screenState: MutableState<ScreenState>
 )
 
 data class ErrorState(val message: String?)
