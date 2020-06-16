@@ -11,20 +11,19 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Actions to run through flow methods
  */
-class AsyncMiddleware : Middleware<AppState>, CoroutineScope {
+class AsyncMiddleware : Middleware, CoroutineScope {
     override fun invoke(
         state: AppState,
         action: Action,
         dispatch: Dispatch,
-        next: Next<AppState>,
-        reducer: Reducer<AppState>
+        next: Next
     ): Action {
         when (action) {
             CounterActions.Increment -> {
                 async { wait10seconds(state, action, dispatch) }
             }
         }
-        return next(state, action, dispatch, reducer)
+        return next(state, action, dispatch)
     }
 
     override val coroutineContext: CoroutineContext
